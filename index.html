@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATLAS — Equity Audit Platform</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:     #f0ede5;
+      --cream-dk:  #e5e0d5;
+      --ink:       #18160e;
+      --ink-lt:    #3d3a30;
+      --amber:     #e8924a;
+      --amber-dk:  #c97030;
+      --blue-g:    #8fb5c8;
+      --lavender:  #b4a0cc;
+      --white:     #ffffff;
+      --muted:     #9c9488;
+      --border:    #ddd8ce;
+      --c-red:     #5c2020;
+      --c-amber:   #7a4010;
+      --c-purple:  #3d2e5c;
+      --c-teal:    #1a4f47;
+      --red:       #ef4444;
+      --red-dk:    #dc2626;
+      --red-bg:    #fef2f2;
+      --red-bdr:   #fecaca;
+      --ylw:       #f59e0b;
+      --ylw-dk:    #d97706;
+      --ylw-bg:    #fffbeb;
+      --ylw-bdr:   #fde68a;
+      --grn-bg:    #ecfdf5;
+      --grn-bdr:   #a7f3d0;
+      --grn-text:  #065f46;
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+
+    /* ── Nav ── */
+    .nav { background: var(--white); height: 62px; display: flex; align-items: center; padding: 0 36px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 0 rgba(0,0,0,.05); }
+    .logo { font-size: 17px; font-weight: 900; letter-spacing: .22em; color: var(--ink); text-transform: uppercase; }
+    .nav-tag { margin-left: 14px; font-size: 11px; color: var(--muted); letter-spacing: .03em; padding-left: 14px; border-left: 1px solid var(--border); }
+    .nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .reset-btn { display: none; background: none; border: none; font-size: 13px; color: var(--muted); cursor: pointer; padding: 6px 10px; border-radius: 6px; }
+    .reset-btn:hover { color: var(--ink); background: var(--cream); }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: all .15s; white-space: nowrap; }
+    .btn-dark  { background: var(--ink); color: var(--white); }
+    .btn-dark:hover { background: var(--ink-lt); }
+    .btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--border); }
+    .btn-ghost:hover { background: var(--cream-dk); }
+    .btn-sm { padding: 7px 14px; font-size: 13px; }
+
+    /* ── Floating shapes (shared) ── */
+    .shape { position: absolute; pointer-events: none; }
+    .s-circle  { width: 84px; height: 84px; background: var(--amber); border-radius: 50%; top: 9%; left: 4%; opacity: .85; }
+    .s-tri     { width: 72px; height: 72px; background: var(--amber); clip-path: polygon(50% 0%,0% 100%,100% 100%); top: 7%; right: 7%; opacity: .85; }
+    .s-hex     { width: 58px; height: 58px; background: var(--blue-g); clip-path: polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%); top: 42%; left: 2.5%; opacity: .75; }
+    .s-round   { width: 52px; height: 52px; background: var(--lavender); border-radius: 38%; transform: rotate(18deg); top: 36%; right: 3%; opacity: .75; }
+    .s-sq      { width: 36px; height: 36px; background: var(--amber); border-radius: 6px; transform: rotate(32deg); bottom: 26%; left: 7%; opacity: .55; }
+    .s-dot     { width: 22px; height: 22px; background: var(--blue-g); border-radius: 50%; top: 20%; right: 18%; opacity: .5; }
+
+    /* ── Hero shared ── */
+    .hero { position: relative; overflow: hidden; padding: 88px 24px 72px; text-align: center; }
+    .hero-inner { position: relative; max-width: 680px; margin: 0 auto; }
+    .hero-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--amber-dk); background: rgba(232,146,74,.12); border-radius: 20px; padding: 5px 14px; margin-bottom: 24px; }
+    .hero-h1 { font-size: clamp(34px,5.5vw,58px); font-weight: 900; line-height: 1.08; letter-spacing: -.02em; color: var(--ink); margin-bottom: 20px; }
+    .hero-h1 em { font-style: normal; color: var(--amber-dk); }
+    .hero-sub { font-size: 17px; color: var(--ink-lt); line-height: 1.6; max-width: 520px; margin: 0 auto 36px; }
+    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 44px; }
+    .drop-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 28px; cursor: pointer; transition: all .2s; background: rgba(255,255,255,.6); max-width: 460px; margin: 0 auto; }
+    .drop-zone:hover, .drop-zone.over { border-color: var(--amber); background: rgba(232,146,74,.06); }
+    .drop-text { font-size: 14px; color: var(--muted); }
+    .drop-text strong { color: var(--ink); }
+    .drop-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* ── MODE SELECT ── */
+    .mode-select { position: relative; overflow: hidden; padding: 80px 24px 56px; text-align: center; }
+    .mode-cards { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; max-width: 760px; margin: 36px auto 0; }
+    .mode-card { background: var(--white); border-radius: 20px; padding: 40px 32px 32px; border: 1px solid var(--border); cursor: pointer; transition: all .2s; text-align: left; }
+    .mode-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.1); border-color: var(--amber); }
+    .mode-icon { font-size: 38px; margin-bottom: 16px; }
+    .mode-title { font-size: 21px; font-weight: 800; color: var(--ink); margin-bottom: 10px; }
+    .mode-desc { font-size: 14px; color: var(--muted); line-height: 1.55; margin-bottom: 26px; }
+
+    /* ── Signal cards ── */
+    .signals-section { padding: 0 24px 80px; max-width: 1100px; margin: 0 auto; }
+    .signals-label { text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 24px; }
+    .signals-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+    .sig-card { border-radius: 16px; padding: 26px 22px; color: white; position: relative; overflow: hidden; transition: transform .2s; }
+    .sig-card.c-red    { background: var(--c-red);    transform: rotate(-1.5deg); }
+    .sig-card.c-amber  { background: var(--c-amber);  transform: rotate(1deg); }
+    .sig-card.c-purple { background: var(--c-purple); transform: rotate(-0.8deg); }
+    .sig-card.c-teal   { background: var(--c-teal);   transform: rotate(1.2deg); }
+    .sig-card:hover { transform: rotate(0deg) translateY(-4px); }
+    .sig-level { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .1em; padding: 3px 8px; border-radius: 4px; margin-bottom: 14px; }
+    .sig-level.RED    { background: rgba(255,255,255,.2); color: #ffb3b3; }
+    .sig-level.YELLOW { background: rgba(255,255,255,.2); color: #ffe08a; }
+    .sig-name    { font-size: 17px; font-weight: 800; line-height: 1.2; margin-bottom: 10px; }
+    .sig-trigger { font-size: 12px; opacity: .75; line-height: 1.5; }
+    .sig-deco    { position: absolute; bottom: -20px; right: -20px; width: 90px; height: 90px; border-radius: 50%; background: rgba(255,255,255,.07); }
+
+    /* ── DISTRICT upload ── */
+    .district-hero { position: relative; overflow: hidden; padding: 72px 24px 60px; text-align: center; }
+
+    /* ── DASHBOARD ── */
+    .dashboard { display: none; }
+    .dashboard.active { display: block; }
+    .dash-inner { max-width: 1300px; margin: 0 auto; padding: 32px 24px 48px; }
+    .dash-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 10px; }
+    .dash-heading { font-size: 26px; font-weight: 800; color: var(--ink); }
+    .dash-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+    .dash-link { font-size: 13px; font-weight: 600; color: var(--amber-dk); cursor: pointer; background: none; border: none; padding: 0; }
+    .dash-link:hover { text-decoration: underline; }
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
+    .stat-card { background: var(--white); border-radius: 12px; padding: 20px 22px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+    .stat-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 8px; }
+    .stat-val { font-size: 36px; font-weight: 900; color: var(--ink); line-height: 1; }
+    .stat-val.red { color: var(--red-dk); }
+    .stat-val.ylw { color: var(--ylw-dk); }
+    .stat-val.amb { color: var(--amber-dk); }
+    .stat-hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .filters { background: var(--white); border-radius: 12px; padding: 14px 18px; margin-bottom: 14px; border: 1px solid var(--border); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .f-lbl { font-size: 12px; font-weight: 700; color: var(--muted); }
+    .f-select, .f-input { font-size: 13px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 7px; color: var(--ink); background: var(--cream); }
+    .f-input { width: 170px; }
+    .f-count { margin-left: auto; font-size: 12px; color: var(--muted); }
+    .tbl-wrap { background: var(--white); border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,.04); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { background: var(--cream); padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap; }
+    thead th:hover { color: var(--ink); }
+    tbody td { padding: 13px 16px; border-bottom: 1px solid var(--cream); font-size: 13px; color: var(--ink-lt); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--cream); cursor: pointer; }
+    .cell-id { font-weight: 800; color: var(--ink); font-size: 14px; }
+    .fbadge { display: inline-flex; align-items: center; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px; margin-right: 4px; white-space: nowrap; letter-spacing: .04em; }
+    .fbadge.RED    { background: var(--red-bg); color: var(--red-dk); border: 1px solid var(--red-bdr); }
+    .fbadge.YELLOW { background: var(--ylw-bg); color: #92400e; border: 1px solid var(--ylw-bdr); }
+    .fbadge.NONE   { background: var(--grn-bg); color: var(--grn-text); border: 1px solid var(--grn-bdr); }
+    .chip { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; margin-right: 3px; white-space: nowrap; }
+    .chip-triggered { background: #fecaca; color: #7f1d1d; }
+    .chip-clear     { background: var(--cream-dk); color: var(--muted); }
+    .empty { text-align: center; padding: 56px 20px; color: var(--muted); }
+    .empty-icon { font-size: 36px; margin-bottom: 10px; }
+    .empty-msg  { font-size: 14px; }
+
+    /* ── MODAL ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(24,22,14,.6); z-index: 200; justify-content: center; align-items: flex-start; padding: 40px 20px; overflow-y: auto; }
+    .overlay.active { display: flex; }
+    .modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 740px; box-shadow: 0 24px 64px rgba(0,0,0,.25); margin: auto; }
+    .modal-head { padding: 20px 26px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 18px; font-weight: 800; color: var(--ink); }
+    .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1; padding: 2px 6px; border-radius: 4px; }
+    .modal-close:hover { color: var(--ink); background: var(--cream); }
+    .modal-body { padding: 26px; }
+
+    /* ── Shared result elements (modal + parent results) ── */
+    .demo-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 24px; }
+    .demo-cell { background: var(--cream); border-radius: 10px; padding: 12px 14px; }
+    .demo-cell-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+    .demo-cell-val { font-size: 15px; font-weight: 800; color: var(--ink); }
+    .section-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 22px 0 10px; }
+    .flag-card { border-radius: 10px; padding: 14px 16px; margin-bottom: 9px; }
+    .flag-card.RED    { background: var(--red-bg); border: 1px solid var(--red-bdr); }
+    .flag-card.YELLOW { background: var(--ylw-bg); border: 1px solid var(--ylw-bdr); }
+    .fc-head  { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .fc-level { font-size: 11px; font-weight: 900; letter-spacing: .1em; }
+    .fc-level.RED    { color: var(--red-dk); }
+    .fc-level.YELLOW { color: var(--ylw-dk); }
+    .fc-label { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .fc-desc  { font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+    .fc-data  { font-size: 11px; color: var(--muted); font-family: monospace; }
+    .no-flags-box { background: var(--grn-bg); border: 1px solid var(--grn-bdr); border-radius: 10px; padding: 16px; text-align: center; font-size: 13px; font-weight: 600; color: var(--grn-text); }
+    .screen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .screen-row { border-radius: 8px; padding: 10px 14px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--cream); }
+    .screen-row.on { border-color: #fca5a5; background: var(--red-bg); }
+    .screen-name  { font-size: 12px; font-weight: 600; color: var(--ink-lt); }
+    .screen-score { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .screen-badge { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 3px; }
+    .screen-badge.on  { background: #fecaca; color: #7f1d1d; }
+    .screen-badge.off { background: var(--cream-dk); color: var(--muted); }
+    .bars { display: flex; flex-direction: column; gap: 9px; }
+    .bar-row { display: grid; grid-template-columns: 150px 1fr 48px; align-items: center; gap: 10px; }
+    .bar-lbl  { font-size: 12px; color: var(--ink-lt); font-weight: 500; }
+    .bar-track { height: 7px; background: var(--cream-dk); border-radius: 4px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 4px; }
+    .bar-val   { font-size: 12px; font-weight: 700; color: var(--ink-lt); text-align: right; }
+
+    /* ── PARENT SECTION ── */
+    .parent-wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 60px; }
+    .parent-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; margin-bottom: 20px; background: none; border: none; padding: 0; }
+    .parent-back:hover { color: var(--ink); }
+    .parent-title { font-size: 28px; font-weight: 900; color: var(--ink); margin-bottom: 6px; }
+    .parent-sub   { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+    .entry-tabs { display: flex; gap: 0; background: var(--cream-dk); border-radius: 10px; padding: 4px; margin-bottom: 24px; width: fit-content; }
+    .etab { background: none; border: none; cursor: pointer; padding: 8px 20px; border-radius: 7px; font-size: 13px; font-weight: 600; color: var(--muted); transition: all .15s; }
+    .etab.active { background: white; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+    .parent-drop { border: 2px dashed var(--border); border-radius: 12px; padding: 52px 32px; cursor: pointer; transition: all .2s; background: rgba(255,255,255,.6); text-align: center; }
+    .parent-drop:hover, .parent-drop.over { border-color: var(--amber); background: rgba(232,146,74,.06); }
+    .error-inline { background: var(--red-bg); border: 1px solid var(--red-bdr); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--red-dk); margin-top: 14px; display: none; }
+
+    /* Parent form */
+    .pform-section { background: var(--white); border-radius: 12px; border: 1px solid var(--border); padding: 20px 24px; margin-bottom: 12px; }
+    .pform-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+    .pft-blue   { color: #2563eb; }
+    .pft-purple { color: #7c3aed; }
+    .pft-amber  { color: var(--amber-dk); }
+    .pft-teal   { color: #0d9488; }
+    .pft-gray   { color: var(--muted); }
+    .pft-range  { font-size: 10px; font-weight: 600; opacity: .6; margin-left: 6px; text-transform: none; letter-spacing: 0; }
+    .pf-scale-hint { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+    .pform-demo { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+    .pform-field { display: flex; flex-direction: column; gap: 5px; }
+    .pf-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .pf-input { font-size: 13px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; color: var(--ink); background: var(--cream); width: 100%; }
+    .q-list { display: flex; flex-direction: column; gap: 0; }
+    .q-row { display: grid; grid-template-columns: 34px 1fr 175px; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--cream-dk); }
+    .q-row:last-child { border-bottom: none; }
+    .q-num   { font-size: 10px; font-weight: 800; color: var(--muted); }
+    .q-label { font-size: 12px; color: var(--ink-lt); line-height: 1.35; }
+    .q-select { font-size: 12px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--cream); color: var(--ink); }
+    .pform-submit { margin-top: 20px; display: flex; gap: 10px; align-items: center; }
+
+    /* Parent results */
+    .pr-wrap  { max-width: 800px; margin: 0 auto; padding: 40px 24px 60px; }
+    .pr-top   { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 14px; }
+    .pr-head  { font-size: 26px; font-weight: 900; color: var(--ink); }
+    .pr-sub   { font-size: 14px; color: var(--muted); margin-top: 4px; }
+    .pr-body  { background: var(--white); border-radius: 14px; border: 1px solid var(--border); padding: 28px; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+
+    /* Parent enhanced flag cards */
+    .pfc-card { border-radius: 20px; padding: 26px 28px; margin-bottom: 14px; }
+    .pfc-card.RED    { background: var(--red-bg);  border: 2px solid var(--red-bdr); }
+    .pfc-card.YELLOW { background: var(--ylw-bg);  border: 2px solid var(--ylw-bdr); }
+    .pfc-emoji { font-size: 36px; margin-bottom: 10px; line-height: 1; }
+    .pfc-badge { font-size: 10px; font-weight: 900; letter-spacing: .12em; padding: 5px 13px; border-radius: 30px; display: inline-block; margin-bottom: 12px; }
+    .pfc-badge.RED    { background: var(--red-dk); color: #fff; }
+    .pfc-badge.YELLOW { background: var(--ylw-dk); color: #fff; }
+    .pfc-label { font-size: 22px; font-weight: 900; color: var(--ink); margin-bottom: 7px; line-height: 1.15; }
+    .pfc-desc  { font-size: 15px; color: var(--ink-lt); margin-bottom: 10px; line-height: 1.5; }
+    .pfc-detail { font-size: 12px; color: var(--muted); font-family: monospace; }
+    .pfc-noflag { background: var(--grn-bg); border: 2px solid var(--grn-bdr); border-radius: 20px; padding: 36px 28px; text-align: center; }
+    .pfc-noflag-icon  { font-size: 48px; margin-bottom: 12px; line-height: 1; }
+    .pfc-noflag-title { font-size: 21px; font-weight: 900; color: var(--grn-text); margin-bottom: 8px; }
+    .pfc-noflag-sub   { font-size: 13px; color: var(--grn-text); opacity: .75; line-height: 1.6; max-width: 380px; margin: 0 auto; }
+
+    /* Parent sample button */
+    .sample-divider { text-align: center; font-size: 12px; color: var(--muted); margin: 20px 0; letter-spacing: .05em; }
+    .sample-wrap { text-align: center; }
+
+    /* ── Responsive ── */
+    @media (max-width: 960px) {
+      .signals-grid { grid-template-columns: repeat(2,1fr); }
+      .mode-cards { grid-template-columns: 1fr; max-width: 480px; }
+    }
+    @media (max-width: 700px) {
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      .demo-grid { grid-template-columns: repeat(3,1fr); }
+      .screen-grid { grid-template-columns: 1fr; }
+      .signals-grid { grid-template-columns: 1fr 1fr; }
+      .bar-row { grid-template-columns: 110px 1fr 38px; }
+      .pform-demo { grid-template-columns: repeat(2,1fr); }
+      .q-row { grid-template-columns: 28px 1fr 140px; }
+      .s-hex, .s-round, .s-sq { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ NAV ══════════════ -->
+<nav class="nav">
+  <span class="logo">ATLAS</span>
+  <span class="nav-tag" id="navTag">Equity Audit Platform</span>
+  <div class="nav-right">
+    <button class="reset-btn" id="resetBtn" onclick="resetToModeSelect()">← Change Mode</button>
+  </div>
+</nav>
+
+<!-- ══════════════ MODE SELECT ══════════════ -->
+<div id="modeSelect">
+  <div class="mode-select">
+    <div class="shape s-circle"></div>
+    <div class="shape s-tri"></div>
+    <div class="shape s-hex"></div>
+    <div class="shape s-round"></div>
+    <div class="shape s-sq"></div>
+    <div class="shape s-dot"></div>
+    <div class="hero-inner">
+      <span class="hero-eyebrow">NICHQ Vanderbilt · Teacher Assessment</span>
+      <h1 class="hero-h1">Equity-first auditing for <em>Vanderbilt screenings.</em></h1>
+      <p class="hero-sub">ATLAS detects equity signals in Vanderbilt assessments — patterns that may reflect bias in how disorders are identified in children.</p>
+      <div class="mode-cards">
+        <div class="mode-card" onclick="selectMode('district')">
+          <div class="mode-icon">🏫</div>
+          <div class="mode-title">School District</div>
+          <p class="mode-desc">Bulk CSV upload for population-level equity auditing. Review equity signals across all students at once.</p>
+          <button class="btn btn-dark" tabindex="-1">Get Started →</button>
+        </div>
+        <div class="mode-card" onclick="selectMode('parent')">
+          <div class="mode-icon">👤</div>
+          <div class="mode-title">Parent Portal</div>
+          <p class="mode-desc">Review your child's Vanderbilt assessment results for equity signals — one student at a time.</p>
+          <button class="btn btn-ghost" tabindex="-1">Get Started →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="signals-section">
+    <p class="signals-label">Equity Signals Detected by ATLAS</p>
+    <div class="signals-grid">
+      <div class="sig-card c-red">
+        <div class="sig-level RED">RED</div>
+        <div class="sig-name">Pathologizing Risk</div>
+        <div class="sig-trigger">Race: Black/Hispanic &amp; ODD Screen &gt;3 items — Review for Implicit Bias</div>
+        <div class="sig-deco"></div>
+      </div>
+      <div class="sig-card c-amber">
+        <div class="sig-level YELLOW">YELLOW</div>
+        <div class="sig-name">Masking Risk</div>
+        <div class="sig-trigger">Sex: Female &amp; Performance max &lt;4 — Grades do not rule out ADHD</div>
+        <div class="sig-deco"></div>
+      </div>
+      <div class="sig-card c-purple">
+        <div class="sig-level YELLOW">YELLOW</div>
+        <div class="sig-name">Internalizing Risk</div>
+        <div class="sig-trigger">Sex: Female &amp; Anxiety Screen &gt;3 items — Audit for ADHD-Inattentive</div>
+        <div class="sig-deco"></div>
+      </div>
+      <div class="sig-card c-teal">
+        <div class="sig-level YELLOW">YELLOW</div>
+        <div class="sig-name">Linguistic Gap</div>
+        <div class="sig-trigger">Language: ELL &amp; Inattentive Q3 or Q4 elevated — Validate in home language</div>
+        <div class="sig-deco"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ DISTRICT: Upload ══════════════ -->
+<div id="uploadSection" style="display:none">
+  <div class="hero">
+    <div class="shape s-circle"></div>
+    <div class="shape s-tri"></div>
+    <div class="shape s-hex"></div>
+    <div class="shape s-round"></div>
+    <div class="shape s-sq"></div>
+    <div class="shape s-dot"></div>
+    <div class="hero-inner">
+      <span class="hero-eyebrow">School District Portal</span>
+      <h1 class="hero-h1">Upload your <em>assessment</em> data.</h1>
+      <p class="hero-sub">Upload a Vanderbilt Teacher Assessment CSV to surface equity signals across your student population.</p>
+      <div class="hero-btns">
+        <button class="btn btn-dark" onclick="loadSample()">Load Sample Data</button>
+        <label class="btn btn-ghost" style="cursor:pointer">
+          Upload CSV
+          <input type="file" id="fileInput" accept=".csv,.txt" style="display:none" onchange="handleFileInput(this.files[0])">
+        </label>
+      </div>
+      <div class="drop-zone" id="dropZone"
+           onclick="document.getElementById('fileInput').click()"
+           ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+        <div class="drop-text"><strong>Drop a CSV file here</strong></div>
+        <div class="drop-hint">48-column NICHQ Vanderbilt Teacher Assessment format</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ DISTRICT: Dashboard ══════════════ -->
+<div class="dashboard" id="dashboard">
+  <div class="dash-inner">
+    <div class="dash-top">
+      <div class="dash-heading">Audit Results</div>
+      <button class="dash-link" onclick="returnToDistrictUpload()">← Upload different file</button>
+    </div>
+    <div class="dash-sub">Click any student row to view their full equity signal breakdown.</div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-lbl">Total Students</div><div class="stat-val" id="sTotal">—</div><div class="stat-hint">in dataset</div></div>
+      <div class="stat-card"><div class="stat-lbl">RED Flags</div><div class="stat-val red" id="sRed">—</div><div class="stat-hint">Pathologizing Risk</div></div>
+      <div class="stat-card"><div class="stat-lbl">YELLOW Flags</div><div class="stat-val ylw" id="sYlw">—</div><div class="stat-hint">students with ≥1 warning</div></div>
+      <div class="stat-card"><div class="stat-lbl">Require Review</div><div class="stat-val amb" id="sFlagged">—</div><div class="stat-hint">any equity signal present</div></div>
+    </div>
+    <div class="filters">
+      <span class="f-lbl">Filter:</span>
+      <select class="f-select" id="fFlag" onchange="applyFilters()">
+        <option value="">All Signals</option>
+        <option value="RED">RED only</option>
+        <option value="YELLOW">YELLOW only</option>
+        <option value="NONE">No flags</option>
+      </select>
+      <select class="f-select" id="fRace" onchange="applyFilters()"><option value="">All Races</option></select>
+      <select class="f-select" id="fSex"  onchange="applyFilters()"><option value="">All Sexes</option></select>
+      <select class="f-select" id="fLang" onchange="applyFilters()"><option value="">All Languages</option></select>
+      <input class="f-input" id="fSearch" type="search" placeholder="Search by ID…" oninput="applyFilters()">
+      <span class="f-count" id="fCount"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th onclick="sortBy('ID')">ID ↕</th>
+          <th onclick="sortBy('Age')">Age ↕</th>
+          <th onclick="sortBy('Sex')">Sex</th>
+          <th onclick="sortBy('Race')">Race</th>
+          <th onclick="sortBy('Language')">Language</th>
+          <th>Equity Signals</th>
+          <th>Clinical Screens Triggered</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PARENT: Entry ══════════════ -->
+<div id="parentSection" style="display:none">
+
+  <!-- Hero state -->
+  <div id="parentHero">
+    <div class="hero">
+      <div class="shape s-circle"></div>
+      <div class="shape s-tri"></div>
+      <div class="shape s-hex"></div>
+      <div class="shape s-round"></div>
+      <div class="shape s-sq"></div>
+      <div class="shape s-dot"></div>
+      <div class="hero-inner">
+        <span class="hero-eyebrow">Parent Portal · One Student at a Time</span>
+        <h1 class="hero-h1">Understand your child's <em>assessment.</em></h1>
+        <p class="hero-sub">Check for equity signals in your child's Vanderbilt Teacher Assessment — load a sample, upload the CSV, or enter the scores manually.</p>
+        <div class="hero-btns">
+          <button class="btn btn-dark" onclick="loadParentSample()">🎲 Load Sample Student</button>
+          <label class="btn btn-ghost" style="cursor:pointer">
+            Upload CSV
+            <input type="file" id="parentFileInput" accept=".csv,.txt" style="display:none" onchange="handleParentFile(this.files[0])">
+          </label>
+          <button class="btn btn-ghost" onclick="showParentForm()">✏️ Enter Manually</button>
+        </div>
+        <div class="drop-zone" id="parentDropZone"
+             onclick="document.getElementById('parentFileInput').click()"
+             ondragover="parentDragOver(event)" ondragleave="parentDragLeave(event)" ondrop="parentDrop(event)">
+          <div class="drop-text"><strong>Drop your child's CSV here</strong></div>
+          <div class="drop-hint" style="margin-top:4px;">Single-student row · 48-column Vanderbilt format</div>
+        </div>
+        <div class="error-inline" id="parentError" style="max-width:460px;margin:16px auto 0;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form state (hidden by default) -->
+  <div id="parentFormPanel" style="display:none">
+    <div class="parent-wrap">
+      <button class="parent-back" onclick="hideParentForm()">← Back</button>
+      <div class="parent-title">Enter Assessment Scores</div>
+      <div class="parent-sub">Fill in your child's Vanderbilt Teacher Assessment scores below.</div>
+      <div id="parentFormContainer"></div>
+      <div class="pform-submit">
+        <button class="btn btn-dark" onclick="submitParentForm()">Calculate Equity Signals</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════ PARENT: Results ══════════════ -->
+<div id="parentResults" style="display:none">
+  <div class="pr-wrap">
+    <div class="pr-top">
+      <div>
+        <div class="pr-head">Equity Audit Results</div>
+        <div class="pr-sub">NICHQ Vanderbilt Teacher Assessment · Single Student</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="resetParent()">← Run Another</button>
+    </div>
+    <div class="pr-body" id="parentResultsBody"></div>
+  </div>
+</div>
+
+<!-- ══════════════ DISTRICT: Modal ══════════════ -->
+<div class="overlay" id="overlay" onclick="maybeClose(event)">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">Student Detail</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  SAMPLE DATA
+// ─────────────────────────────────────────────
+const SAMPLE = `ID,Age,Sex,Race,Language,Q1_Inatt,Q2_Inatt,Q3_Inatt,Q4_Inatt,Q5_Inatt,Q6_Inatt,Q7_Inatt,Q8_Inatt,Q9_Inatt,Q10_Hyp,Q11_Hyp,Q12_Hyp,Q13_Hyp,Q14_Hyp,Q15_Hyp,Q16_Hyp,Q17_Hyp,Q18_Hyp,Q19_ODD,Q20_ODD,Q21_ODD,Q22_ODD,Q23_ODD,Q24_ODD,Q25_ODD,Q26_ODD,Q27_Cond,Q28_Cond,Q29_Anx,Q30_Anx,Q31_Anx,Q32_Anx,Q33_Anx,Q34_Anx,Q35_Anx,Q36_Perf,Q37_Perf,Q38_Perf,Q39_Perf,Q40_Perf,Q41_Perf,Q42_Perf,Q43_Perf
+1,8,Male,Black,English,1,1,2,2,1,0,1,1,0,3,3,3,2,3,3,2,3,3,3,3,3,2,3,3,2,3,2,2,1,0,1,0,0,0,1,3,3,3,2,2,3,3,3
+2,9,Female,White,English,3,3,2,3,3,3,2,3,3,0,1,0,0,1,0,0,0,1,0,0,1,0,0,0,0,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1
+3,7,Male,Hispanic,Spanish,1,1,3,3,1,0,0,0,1,1,1,2,1,1,1,1,1,1,1,0,1,1,0,0,0,1,0,0,1,1,0,1,1,0,1,3,3,3,4,4,3,3,3
+4,10,Female,Asian,English,3,2,3,3,3,3,3,2,3,1,0,1,0,1,1,0,0,1,0,1,0,0,1,0,0,0,0,0,3,3,3,3,2,3,3,2,1,2,1,1,1,1,1
+5,8,Male,White,English,1,0,1,0,0,1,1,1,1,3,3,2,3,3,3,2,3,3,1,0,1,0,0,0,1,0,0,0,1,1,0,0,0,0,1,4,4,5,4,4,4,5,4
+6,9,Male,Black,English,2,1,2,2,1,1,0,0,1,3,3,3,3,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,0,1,0,0,0,4,4,3,4,4,3,4,3
+7,11,Female,Black,English,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,0,1,0,1,0,0,0,1,0,0,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1
+8,8,Female,Hispanic,English,2,2,3,3,2,2,2,2,2,1,1,0,1,0,1,0,1,1,0,0,0,1,0,0,0,1,0,0,3,3,3,3,2,3,3,2,2,2,1,2,2,2,1
+9,7,Male,Other,English,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5,5,5,5,5,5,5,5
+10,12,Female,White,English,3,3,3,3,2,3,3,3,3,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,3,3,3,2,3,3,3,1,1,1,1,1,1,1,1`;
+
+// ─────────────────────────────────────────────
+//  QUESTION BANK
+// ─────────────────────────────────────────────
+const Q_INATT  = [[1,"Fails to give close attention / makes careless mistakes"],[2,"Has difficulty sustaining attention"],[3,"Does not seem to listen when spoken to directly"],[4,"Does not follow through on instructions"],[5,"Has difficulty organizing tasks and activities"],[6,"Avoids tasks requiring sustained mental effort"],[7,"Loses things necessary for tasks or activities"],[8,"Easily distracted by extraneous stimuli"],[9,"Forgetful in daily activities"]];
+const Q_HYP    = [[10,"Fidgets with hands or feet or squirms in seat"],[11,"Leaves seat in classroom"],[12,"Runs or climbs excessively in inappropriate situations"],[13,"Has difficulty playing or engaging in leisure activities quietly"],[14,'Is "on the go" or acts as if "driven by a motor"'],[15,"Talks excessively"],[16,"Blurts out answers before questions have been completed"],[17,"Has difficulty awaiting turn"],[18,"Interrupts or intrudes on others"]];
+const Q_ODD    = [[19,"Argues with adults"],[20,"Loses temper"],[21,"Actively defies or refuses to comply with adult requests"],[22,"Deliberately annoys people"],[23,"Blames others for mistakes or misbehavior"],[24,"Touchy or easily annoyed by others"],[25,"Angry or resentful"],[26,"Spiteful or vindictive"],[27,"Bullies, threatens, or intimidates others"],[28,"Initiates physical fights"]];
+const Q_ANX    = [[29,"Fearful, anxious, or worried"],[30,"Self-conscious or easily embarrassed"],[31,"Worries"],[32,"Complains of stomachaches or headaches"],[33,"Has difficulty with peer relationships"],[34,"Feels worthless or inferior"],[35,"Complains of being sad, depressed, or hopeless"]];
+const Q_PERF   = [[36,"Reading"],[37,"Mathematics"],[38,"Written expression"],[39,"Relationship with peers"],[40,"Following directions"],[41,"Disrupting class"],[42,"Assignment completion"],[43,"Organizational skills"]];
+
+function qKey(q) {
+  if (q <= 9)  return `Q${q}_Inatt`;
+  if (q <= 18) return `Q${q}_Hyp`;
+  if (q <= 26) return `Q${q}_ODD`;
+  if (q <= 28) return `Q${q}_Cond`;
+  if (q <= 35) return `Q${q}_Anx`;
+  return `Q${q}_Perf`;
+}
+
+function behavOpts(id) {
+  return `<select class="q-select" id="${id}"><option value="0">0 — Never</option><option value="1">1 — Occasionally</option><option value="2">2 — Often</option><option value="3">3 — Very Often</option></select>`;
+}
+function perfOpts(id) {
+  return `<select class="q-select" id="${id}"><option value="1">1 — Excellent</option><option value="2">2 — Above Avg</option><option value="3" selected>3 — Average</option><option value="4">4 — Somewhat a Problem</option><option value="5">5 — Problematic</option></select>`;
+}
+function qRows(qs, perf=false) {
+  return qs.map(([n,lbl]) => `<div class="q-row"><span class="q-num">Q${n}</span><span class="q-label">${lbl}</span>${perf ? perfOpts(qKey(n)) : behavOpts(qKey(n))}</div>`).join('');
+}
+
+function buildParentForm() {
+  return `
+  <div class="pform-section">
+    <div class="pform-title pft-gray">Demographics</div>
+    <div style="height:12px"></div>
+    <div class="pform-demo">
+      <div class="pform-field"><label class="pf-label">Age</label><input class="pf-input" id="pAge" type="number" min="3" max="18" placeholder="e.g. 9"></div>
+      <div class="pform-field"><label class="pf-label">Sex</label><select class="pf-input" id="pSex"><option value="">Select…</option><option>Male</option><option>Female</option><option>Non-binary</option></select></div>
+      <div class="pform-field"><label class="pf-label">Race / Ethnicity</label><select class="pf-input" id="pRace"><option value="">Select…</option><option>Black</option><option>Hispanic</option><option>White</option><option>Asian</option><option>Other</option></select></div>
+      <div class="pform-field"><label class="pf-label">Home Language</label><select class="pf-input" id="pLang"><option value="">Select…</option><option>English</option><option>Spanish</option><option>Other</option></select></div>
+    </div>
+  </div>
+  <div class="pform-section">
+    <div class="pform-title pft-blue">Inattentive Symptoms <span class="pft-range">Q1–Q9 · 0=Never, 1=Occasionally, 2=Often, 3=Very Often</span></div>
+    <div class="q-list">${qRows(Q_INATT)}</div>
+  </div>
+  <div class="pform-section">
+    <div class="pform-title pft-purple">Hyperactive / Impulsive Symptoms <span class="pft-range">Q10–Q18</span></div>
+    <div class="q-list">${qRows(Q_HYP)}</div>
+  </div>
+  <div class="pform-section">
+    <div class="pform-title pft-amber">ODD / Conduct Screen <span class="pft-range">Q19–Q28</span></div>
+    <div class="q-list">${qRows(Q_ODD)}</div>
+  </div>
+  <div class="pform-section">
+    <div class="pform-title pft-teal">Anxiety / Depression Screen <span class="pft-range">Q29–Q35</span></div>
+    <div class="q-list">${qRows(Q_ANX)}</div>
+  </div>
+  <div class="pform-section">
+    <div class="pform-title pft-gray">Academic &amp; Behavioral Performance <span class="pft-range">Q36–Q43 · 1=Excellent … 5=Problematic</span></div>
+    <div class="q-list">${qRows(Q_PERF, true)}</div>
+  </div>`;
+}
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let currentMode = null;
+let allStudents = [];
+let sortKey = 'ID';
+let sortAsc  = true;
+
+// ─────────────────────────────────────────────
+//  CSV PARSE
+// ─────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  const headers = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',');
+    const row = {};
+    headers.forEach((h, i) => {
+      const v = (vals[i] || '').trim();
+      row[h] = (v !== '' && !isNaN(v)) ? Number(v) : v;
+    });
+    return row;
+  });
+}
+
+// ─────────────────────────────────────────────
+//  EQUITY FLAG LOGIC  (unchanged)
+// ─────────────────────────────────────────────
+function evaluateFlags(s) {
+  const flags = [];
+  const oddItems  = [s.Q19_ODD,s.Q20_ODD,s.Q21_ODD,s.Q22_ODD,s.Q23_ODD,s.Q24_ODD,s.Q25_ODD,s.Q26_ODD,s.Q27_Cond,s.Q28_Cond];
+  const oddCount  = oddItems.filter(v => v===2||v===3).length;
+  const perfItems = [s.Q36_Perf,s.Q37_Perf,s.Q38_Perf,s.Q39_Perf,s.Q40_Perf,s.Q41_Perf,s.Q42_Perf,s.Q43_Perf];
+  const maxPerf   = Math.max(...perfItems);
+  const anxItems  = [s.Q29_Anx,s.Q30_Anx,s.Q31_Anx,s.Q32_Anx,s.Q33_Anx,s.Q34_Anx,s.Q35_Anx];
+  const anxCount  = anxItems.filter(v => v===2||v===3).length;
+  const race  = (s.Race||'').toLowerCase();
+  const sex   = (s.Sex||'').toLowerCase();
+  const lang  = (s.Language||'').toLowerCase();
+  const isELL = lang !== 'english';
+
+  if ((race==='black'||race==='hispanic') && oddCount>3)
+    flags.push({ level:'RED',    label:'Pathologizing Risk', description:'Review for Implicit Bias',      detail:`ODD/Conduct Screen: ${oddCount}/10 items scored ≥2 (equity threshold: >3)` });
+  if (sex==='female' && maxPerf<4)
+    flags.push({ level:'YELLOW', label:'Masking Risk',       description:'Grades do not rule out ADHD',  detail:`Performance max score: ${maxPerf} — no item reaches impairment threshold (≥4)` });
+  if (sex==='female' && anxCount>3)
+    flags.push({ level:'YELLOW', label:'Internalizing Risk', description:'Audit for ADHD-Inattentive',   detail:`Anxiety/Depression Screen: ${anxCount}/7 items scored ≥2 (threshold: >3)` });
+  if (isELL && (s.Q3_Inatt>=2||s.Q4_Inatt>=2))
+    flags.push({ level:'YELLOW', label:'Linguistic Gap',     description:'Validate in home language',    detail:`ELL student — Q3 Inattentive: ${s.Q3_Inatt}, Q4 Inattentive: ${s.Q4_Inatt}` });
+  return flags;
+}
+
+// ─────────────────────────────────────────────
+//  CLINICAL SCREENS  (unchanged)
+// ─────────────────────────────────────────────
+function clinicalScreens(s) {
+  const inattN = [s.Q1_Inatt,s.Q2_Inatt,s.Q3_Inatt,s.Q4_Inatt,s.Q5_Inatt,s.Q6_Inatt,s.Q7_Inatt,s.Q8_Inatt,s.Q9_Inatt].filter(v=>v===2||v===3).length;
+  const hypN   = [s.Q10_Hyp,s.Q11_Hyp,s.Q12_Hyp,s.Q13_Hyp,s.Q14_Hyp,s.Q15_Hyp,s.Q16_Hyp,s.Q17_Hyp,s.Q18_Hyp].filter(v=>v===2||v===3).length;
+  const oddN   = [s.Q19_ODD,s.Q20_ODD,s.Q21_ODD,s.Q22_ODD,s.Q23_ODD,s.Q24_ODD,s.Q25_ODD,s.Q26_ODD,s.Q27_Cond,s.Q28_Cond].filter(v=>v===2||v===3).length;
+  const anxN   = [s.Q29_Anx,s.Q30_Anx,s.Q31_Anx,s.Q32_Anx,s.Q33_Anx,s.Q34_Anx,s.Q35_Anx].filter(v=>v===2||v===3).length;
+  const perfItems = [s.Q36_Perf,s.Q37_Perf,s.Q38_Perf,s.Q39_Perf,s.Q40_Perf,s.Q41_Perf,s.Q42_Perf,s.Q43_Perf];
+  const perfImpaired = perfItems.some(v=>v>=4);
+  const maxPerf = Math.max(...perfItems);
+  const inattOn=inattN>=6&&perfImpaired, hypOn=hypN>=6&&perfImpaired, oddOn=oddN>=3&&perfImpaired, anxOn=anxN>=3&&perfImpaired;
+  return {
+    screens:[
+      {name:'Inattentive Subtype',   on:inattOn,            score:`${inattN}/9`,  detail:'≥6 items'},
+      {name:'Hyperactive/Impulsive', on:hypOn,              score:`${hypN}/9`,    detail:'≥6 items'},
+      {name:'Combined ADHD',         on:inattOn&&hypOn,     score:inattOn&&hypOn?'Both':'—', detail:'Both criteria'},
+      {name:'ODD/Conduct Screen',    on:oddOn,              score:`${oddN}/10`,   detail:'≥3 items'},
+      {name:'Anxiety/Depression',    on:anxOn,              score:`${anxN}/7`,    detail:'≥3 items'},
+      {name:'Performance Impaired',  on:perfImpaired,       score:`Max ${maxPerf}`,detail:'Any item ≥4'},
+    ],
+    raw:{inattN,hypN,oddN,anxN,maxPerf,perfImpaired}
+  };
+}
+
+// ─────────────────────────────────────────────
+//  MODE & NAV
+// ─────────────────────────────────────────────
+function selectMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeSelect').style.display = 'none';
+  document.getElementById('resetBtn').style.display = 'inline-block';
+  document.getElementById('navTag').textContent = mode === 'district' ? 'School District' : 'Parent Portal';
+  if (mode === 'district') {
+    document.getElementById('uploadSection').style.display = '';
+  } else {
+    document.getElementById('parentSection').style.display = '';
+  }
+}
+
+function resetToModeSelect() {
+  ['uploadSection','parentSection','parentResults'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('dashboard').classList.remove('active');
+  document.getElementById('parentHero').style.display = '';
+  document.getElementById('parentFormPanel').style.display = 'none';
+  document.getElementById('modeSelect').style.display = '';
+  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('navTag').textContent = 'Equity Audit Platform';
+  allStudents = [];
+  currentMode = null;
+  ['fileInput','parentFileInput'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('parentFormContainer').innerHTML = '';
+  document.getElementById('parentError').style.display = 'none';
+  window.scrollTo(0,0);
+}
+
+function returnToDistrictUpload() {
+  document.getElementById('dashboard').classList.remove('active');
+  document.getElementById('uploadSection').style.display = '';
+  allStudents = [];
+  document.getElementById('fileInput').value = '';
+}
+
+// ─────────────────────────────────────────────
+//  DISTRICT UPLOAD
+// ─────────────────────────────────────────────
+function loadSample() { processCSV(SAMPLE); }
+
+function handleFileInput(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => processCSV(e.target.result);
+  r.readAsText(file);
+}
+
+function onDragOver(e)  { e.preventDefault(); document.getElementById('dropZone').classList.add('over'); }
+function onDragLeave()  { document.getElementById('dropZone').classList.remove('over'); }
+function onDrop(e)      { e.preventDefault(); document.getElementById('dropZone').classList.remove('over'); const f=e.dataTransfer.files[0]; if(f) handleFileInput(f); }
+
+function processCSV(text) {
+  const rows = parseCSV(text);
+  allStudents = rows.map(r => ({...r, flags: evaluateFlags(r)}));
+  buildFilterOptions();
+  updateStats();
+  applyFilters();
+  document.getElementById('uploadSection').style.display = 'none';
+  document.getElementById('dashboard').classList.add('active');
+}
+
+// ─────────────────────────────────────────────
+//  PARENT SAMPLE LOAD
+// ─────────────────────────────────────────────
+function loadParentSample() {
+  const rows = parseCSV(SAMPLE);
+  renderParentResults(rows[Math.floor(Math.random() * rows.length)]);
+}
+
+// ─────────────────────────────────────────────
+//  PARENT UPLOAD
+// ─────────────────────────────────────────────
+function handleParentFile(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => processParentData(e.target.result);
+  r.readAsText(file);
+}
+
+function parentDragOver(e)  { e.preventDefault(); document.getElementById('parentDropZone').classList.add('over'); }
+function parentDragLeave()  { document.getElementById('parentDropZone').classList.remove('over'); }
+function parentDrop(e)      { e.preventDefault(); document.getElementById('parentDropZone').classList.remove('over'); const f=e.dataTransfer.files[0]; if(f) handleParentFile(f); }
+
+function processParentData(text) {
+  const rows = parseCSV(text);
+  const err  = document.getElementById('parentError');
+  if (rows.length === 0) { err.textContent='No student data found in this file.'; err.style.display='block'; return; }
+  if (rows.length > 1)   { err.textContent=`This file has ${rows.length} students. The Parent Portal accepts one student at a time. Use the School District portal for bulk uploads.`; err.style.display='block'; return; }
+  err.style.display = 'none';
+  renderParentResults(rows[0]);
+}
+
+// ─────────────────────────────────────────────
+//  PARENT FORM
+// ─────────────────────────────────────────────
+function showParentForm() {
+  const fc = document.getElementById('parentFormContainer');
+  if (!fc.innerHTML) fc.innerHTML = buildParentForm();
+  document.getElementById('parentHero').style.display = 'none';
+  document.getElementById('parentFormPanel').style.display = '';
+  document.getElementById('parentError').style.display = 'none';
+  window.scrollTo(0,0);
+}
+
+function hideParentForm() {
+  document.getElementById('parentFormPanel').style.display = 'none';
+  document.getElementById('parentHero').style.display = '';
+  document.getElementById('parentError').style.display = 'none';
+  window.scrollTo(0,0);
+}
+
+function submitParentForm() {
+  const age  = document.getElementById('pAge').value;
+  const sex  = document.getElementById('pSex').value;
+  const race = document.getElementById('pRace').value;
+  const lang = document.getElementById('pLang').value;
+  const err  = document.getElementById('parentError');
+  if (!age || !sex || !race || !lang) {
+    err.textContent = 'Please complete all demographic fields before submitting.';
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  const s = { ID: '—', Age: Number(age), Sex: sex, Race: race, Language: lang };
+  [...Q_INATT, ...Q_HYP, ...Q_ODD, ...Q_ANX, ...Q_PERF].forEach(([n]) => {
+    const key = qKey(n);
+    const el  = document.getElementById(key);
+    s[key] = el ? Number(el.value) : (n >= 36 ? 1 : 0);
+  });
+  renderParentResults(s);
+}
+
+// ─────────────────────────────────────────────
+//  SHARED RESULT HTML BUILDER
+// ─────────────────────────────────────────────
+function buildResultHTML(s) {
+  const cs = clinicalScreens(s);
+  const { inattN, hypN, oddN, anxN, maxPerf } = cs.raw;
+
+  const demo = `<div class="demo-grid">
+    <div class="demo-cell"><div class="demo-cell-lbl">ID</div><div class="demo-cell-val">${s.ID||'—'}</div></div>
+    <div class="demo-cell"><div class="demo-cell-lbl">Age</div><div class="demo-cell-val">${s.Age} yrs</div></div>
+    <div class="demo-cell"><div class="demo-cell-lbl">Sex</div><div class="demo-cell-val">${s.Sex}</div></div>
+    <div class="demo-cell"><div class="demo-cell-lbl">Race</div><div class="demo-cell-val">${s.Race}</div></div>
+    <div class="demo-cell"><div class="demo-cell-lbl">Language</div><div class="demo-cell-val">${s.Language}</div></div>
+  </div>`;
+
+  const flagsHtml = s.flags.length === 0
+    ? '<div class="no-flags-box">✓ No equity signals triggered for this student.</div>'
+    : s.flags.map(f => `<div class="flag-card ${f.level}"><div class="fc-head"><span class="fc-level ${f.level}">${f.level}</span><span class="fc-label">${f.label}</span></div><div class="fc-desc">${f.description}</div><div class="fc-data">${f.detail}</div></div>`).join('');
+
+  const screenRows = cs.screens.map(sc => `<div class="screen-row ${sc.on?'on':''}"><div><div class="screen-name">${sc.name}</div><div class="screen-score">${sc.score} · ${sc.detail}</div></div><span class="screen-badge ${sc.on?'on':'off'}">${sc.on?'TRIGGERED':'CLEAR'}</span></div>`).join('');
+
+  function bar(lbl, val, max, thr, col) {
+    const pct = Math.round(val/max*100);
+    const c   = val>=thr ? col : '#94a3b8';
+    return `<div class="bar-row"><div class="bar-lbl">${lbl}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c};"></div></div><div class="bar-val" style="color:${val>=thr?col:'#334155'}">${val}/${max}</div></div>`;
+  }
+  function barP(lbl, val) {
+    const pct = Math.round(val/5*100);
+    const c   = val>=4 ? '#ef4444' : '#94a3b8';
+    return `<div class="bar-row"><div class="bar-lbl">${lbl}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c};"></div></div><div class="bar-val" style="color:${val>=4?'#dc2626':'#334155'}">${val}/5</div></div>`;
+  }
+  const barsHtml = `<div class="bars">
+    ${bar('Inattentive (Q1–9)',    inattN,9, 6,'#3b82f6')}
+    ${bar('Hyperactive (Q10–18)', hypN,  9, 6,'#8b5cf6')}
+    ${bar('ODD/Conduct (Q19–28)', oddN,  10,3,'#f59e0b')}
+    ${bar('Anxiety/Dep (Q29–35)', anxN,  7, 3,'#10b981')}
+    ${barP('Performance Max (Q36–43)', maxPerf)}
+  </div>`;
+
+  return `${demo}
+    <div class="section-head">Equity Signals</div>${flagsHtml}
+    <div class="section-head">Vanderbilt Clinical Screens</div><div class="screen-grid">${screenRows}</div>
+    <div class="section-head">Subscale Scores</div>${barsHtml}
+    <p style="font-size:11px;color:#9c9488;margin-top:16px;">Bars show count of items scored ≥2. Colored threshold lines indicate clinical screening criteria. Teacher Assessment format · NICHQ Vanderbilt.</p>`;
+}
+
+// ─────────────────────────────────────────────
+//  PARENT RESULTS — bubbly enhanced renderer
+// ─────────────────────────────────────────────
+const FLAG_EMOJI = { 'Pathologizing Risk':'🚨', 'Masking Risk':'🔍', 'Internalizing Risk':'💛', 'Linguistic Gap':'🗣️' };
+
+function buildParentResultHTML(s) {
+  const cs = clinicalScreens(s);
+  const { inattN, hypN, oddN, anxN, maxPerf } = cs.raw;
+
+  const demo = `<div class="demo-grid">
+    <div class="demo-cell"><div class="demo-cell-lbl">ID</div><div class="demo-cell-val">${s.ID||'—'}</div></div>
+    <div class="demo-cell"><div class="demo-cell-lbl">Age</div><div class="demo-cell-val">${s.Age} yrs</div></div>
+    <div class="demo-cell"><div class="demo-cell-lbl">Sex</div><div class="demo-cell-val">${s.Sex}</div></div>
+    <div class="demo-cell"><div class="demo-cell-lbl">Race</div><div class="demo-cell-val">${s.Race}</div></div>
+    <div class="demo-cell"><div class="demo-cell-lbl">Language</div><div class="demo-cell-val">${s.Language}</div></div>
+  </div>`;
+
+  const flagsHtml = s.flags.length === 0
+    ? `<div class="pfc-noflag">
+        <div class="pfc-noflag-icon">✅</div>
+        <div class="pfc-noflag-title">No equity signals detected</div>
+        <div class="pfc-noflag-sub">This student's results don't trigger any of ATLAS's equity flags. This doesn't replace a full clinical evaluation.</div>
+      </div>`
+    : s.flags.map(f => `
+      <div class="pfc-card ${f.level}">
+        <div class="pfc-emoji">${FLAG_EMOJI[f.label] || (f.level==='RED' ? '🚨' : '⚠️')}</div>
+        <span class="pfc-badge ${f.level}">${f.level}</span>
+        <div class="pfc-label">${f.label}</div>
+        <div class="pfc-desc">${f.description}</div>
+        <div class="pfc-detail">${f.detail}</div>
+      </div>`).join('');
+
+  const screenRows = cs.screens.map(sc => `<div class="screen-row ${sc.on?'on':''}"><div><div class="screen-name">${sc.name}</div><div class="screen-score">${sc.score} · ${sc.detail}</div></div><span class="screen-badge ${sc.on?'on':'off'}">${sc.on?'TRIGGERED':'CLEAR'}</span></div>`).join('');
+
+  function bar(lbl, val, max, thr, col) {
+    const pct = Math.round(val/max*100);
+    const c   = val>=thr ? col : '#94a3b8';
+    return `<div class="bar-row"><div class="bar-lbl">${lbl}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c};"></div></div><div class="bar-val" style="color:${val>=thr?col:'#334155'}">${val}/${max}</div></div>`;
+  }
+  function barP(lbl, val) {
+    const pct = Math.round(val/5*100);
+    const c   = val>=4 ? '#ef4444' : '#94a3b8';
+    return `<div class="bar-row"><div class="bar-lbl">${lbl}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c};"></div></div><div class="bar-val" style="color:${val>=4?'#dc2626':'#334155'}">${val}/5</div></div>`;
+  }
+  const barsHtml = `<div class="bars">
+    ${bar('Inattentive (Q1–9)',    inattN,9, 6,'#3b82f6')}
+    ${bar('Hyperactive (Q10–18)', hypN,  9, 6,'#8b5cf6')}
+    ${bar('ODD/Conduct (Q19–28)', oddN,  10,3,'#f59e0b')}
+    ${bar('Anxiety/Dep (Q29–35)', anxN,  7, 3,'#10b981')}
+    ${barP('Performance Max (Q36–43)', maxPerf)}
+  </div>`;
+
+  return `${demo}
+    <div class="section-head">Equity Signals</div>${flagsHtml}
+    <div class="section-head">Vanderbilt Clinical Screens</div><div class="screen-grid">${screenRows}</div>
+    <div class="section-head">Subscale Scores</div>${barsHtml}
+    <p style="font-size:11px;color:#9c9488;margin-top:16px;">Bars show count of items scored ≥2. Colored bars indicate threshold met. Teacher Assessment format · NICHQ Vanderbilt.</p>`;
+}
+
+function renderParentResults(student) {
+  const s = { ...student, flags: evaluateFlags(student) };
+  document.getElementById('parentResultsBody').innerHTML = buildParentResultHTML(s);
+  document.getElementById('parentSection').style.display = 'none';
+  document.getElementById('parentResults').style.display = '';
+  window.scrollTo(0,0);
+}
+
+function resetParent() {
+  document.getElementById('parentResults').style.display  = 'none';
+  document.getElementById('parentError').style.display    = 'none';
+  document.getElementById('parentFormContainer').innerHTML = '';
+  document.getElementById('parentFormPanel').style.display = 'none';
+  document.getElementById('parentHero').style.display     = '';
+  document.getElementById('parentFileInput').value = '';
+  document.getElementById('parentSection').style.display  = '';
+  window.scrollTo(0,0);
+}
+
+// ─────────────────────────────────────────────
+//  DISTRICT: STATS
+// ─────────────────────────────────────────────
+function updateStats() {
+  const redSet=new Set(), ylwSet=new Set(), flSet=new Set();
+  allStudents.forEach(s => {
+    const lvls = s.flags.map(f=>f.level);
+    if (lvls.includes('RED'))    redSet.add(s.ID);
+    if (lvls.includes('YELLOW')) ylwSet.add(s.ID);
+    if (s.flags.length>0)        flSet.add(s.ID);
+  });
+  document.getElementById('sTotal').textContent   = allStudents.length;
+  document.getElementById('sRed').textContent     = redSet.size;
+  document.getElementById('sYlw').textContent     = ylwSet.size;
+  document.getElementById('sFlagged').textContent = flSet.size;
+}
+
+// ─────────────────────────────────────────────
+//  DISTRICT: FILTERS & SORT
+// ─────────────────────────────────────────────
+function buildFilterOptions() {
+  const races=[...new Set(allStudents.map(s=>s.Race))].sort();
+  const sexes=[...new Set(allStudents.map(s=>s.Sex))].sort();
+  const langs=[...new Set(allStudents.map(s=>s.Language))].sort();
+  function setOpts(id, vals) {
+    const el=document.getElementById(id);
+    el.innerHTML = el.options[0].outerHTML + vals.map(v=>`<option value="${v}">${v}</option>`).join('');
+  }
+  setOpts('fRace',races); setOpts('fSex',sexes); setOpts('fLang',langs);
+}
+
+function applyFilters() {
+  const fFlag=document.getElementById('fFlag').value, fRace=document.getElementById('fRace').value,
+        fSex=document.getElementById('fSex').value,   fLang=document.getElementById('fLang').value,
+        fSearch=document.getElementById('fSearch').value.trim().toLowerCase();
+  let filtered = allStudents.filter(s => {
+    if (fRace   && s.Race     !== fRace)   return false;
+    if (fSex    && s.Sex      !== fSex)    return false;
+    if (fLang   && s.Language !== fLang)   return false;
+    if (fSearch && !String(s.ID).toLowerCase().includes(fSearch)) return false;
+    if (fFlag==='RED')    return s.flags.some(f=>f.level==='RED');
+    if (fFlag==='YELLOW') return s.flags.some(f=>f.level==='YELLOW') && !s.flags.some(f=>f.level==='RED');
+    if (fFlag==='NONE')   return s.flags.length===0;
+    return true;
+  });
+  filtered.sort((a,b) => {
+    let va=a[sortKey], vb=b[sortKey];
+    if (typeof va==='string') { va=va.toLowerCase(); vb=vb.toLowerCase(); }
+    return va<vb ? (sortAsc?-1:1) : va>vb ? (sortAsc?1:-1) : 0;
+  });
+  document.getElementById('fCount').textContent = `${filtered.length} of ${allStudents.length} student${allStudents.length!==1?'s':''}`;
+  renderTable(filtered);
+}
+
+function sortBy(key) { if(sortKey===key) sortAsc=!sortAsc; else{sortKey=key;sortAsc=true;} applyFilters(); }
+
+// ─────────────────────────────────────────────
+//  DISTRICT: TABLE
+// ─────────────────────────────────────────────
+function renderTable(rows) {
+  const tbody = document.getElementById('tbody');
+  if (rows.length===0) { tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-icon">🔍</div><div class="empty-msg">No students match the current filters.</div></div></td></tr>`; return; }
+  tbody.innerHTML = rows.map(s => {
+    const cs = clinicalScreens(s);
+    const chips = cs.screens.filter(sc=>sc.on&&sc.name!=='Combined ADHD').map(sc=>`<span class="chip chip-triggered">${sc.name.split('/')[0]}</span>`).join('') || '<span class="chip chip-clear">None</span>';
+    const badges = s.flags.length ? s.flags.map(f=>`<span class="fbadge ${f.level}">${f.level==='RED'?'RED':f.label.split(' ')[0]}</span>`).join('') : '<span class="fbadge NONE">Clear</span>';
+    return `<tr onclick="openModal(${s.ID})">
+      <td><span class="cell-id">${s.ID}</span></td><td>${s.Age}</td><td>${s.Sex}</td><td>${s.Race}</td>
+      <td>${s.Language}${s.Language.toLowerCase()!=='english'?' <span class="chip chip-triggered" style="font-size:9px">ELL</span>':''}</td>
+      <td>${badges}</td><td>${chips}</td></tr>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+//  DISTRICT: MODAL
+// ─────────────────────────────────────────────
+function openModal(id) {
+  const s = allStudents.find(r=>r.ID===id);
+  if (!s) return;
+  document.getElementById('modalTitle').textContent = `Student #${s.ID}`;
+  document.getElementById('modalBody').innerHTML = buildResultHTML({ ...s, flags: s.flags });
+  document.getElementById('overlay').classList.add('active');
+}
+function closeModal()  { document.getElementById('overlay').classList.remove('active'); }
+function maybeClose(e) { if(e.target===document.getElementById('overlay')) closeModal(); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+</script>
+</body>
+</html>
